@@ -33,58 +33,27 @@ class board:
         return cell.x < 0 or cell.x >= self.width \
             or cell.y < 0 or cell.y >= self.height
 
-    def adj_list(self, cell):
-        # import pdb; pdb.set_trace()     # DEBUGGING
-        adj = []
-        x = cell.x
-        y = cell.y
-
-        for i in range(x-1, x+1):
-            for j in range(y-1, y+1):
-                new = position(j, i)
-                if not self.is_off_board(new):
-                    adj.append(new)
-        #
-        # # top
-        # for i in range(x-1, x+1):
-        #     adj.append(position(i, y-1))
-        # # middle
-        # adj.append(position(x-1, y))
-        # adj.append(position(x+1, y))
-        # # bottom
-        # for i in range(x-1, x+1):
-        #     adj.append(position(i, y+1))
-        #
-        # # remove out-of-bounds cells
-        # for cell in adj:
-        #     if self.is_off_board(cell):
-        #         adj.remove(cell)
-
-        return adj
-
     def cell_adj(self, cell):
-        # import pdb; pdb.set_trace()     # DEBUGGING
         x = cell.x
         y = cell.y
-        print('--------')
         i = x-1
         while i <= x+1:
-        # for i in range(x-1, x+1):
             j = y-1
             while j <= y+1:
-            # for j in range(y-1, y+1):
                 temp = position(i, j)
-                temp.print_pos()
                 if not self.is_off_board(temp) and self.is_mine(temp):
                     self.increment_cell(cell)
                 j += 1
             i += 1
 
     def calculate_adj(self):
+        # @TODO: consider more elegant solution
+        #           update adjacencies for surrounding cells
+        #               when placing a mine
+        #           rather than iterating through the entire grid afterward
         for i in range(self.height):
             for j in range(self.width):
                 cell = position(j, i)
-                # if self.at_position(cell) != -1:
                 if not self.is_mine(cell):
                     self.cell_adj(cell)
 
@@ -93,8 +62,6 @@ class board:
         y = random.randint(0, self.height-1)
         return position(x, y)
 
-
-    #-----
 
     def create_grid(self):
         for i in range(self.height):
@@ -107,14 +74,7 @@ class board:
             curr_mine = self.random_position()
             if self.at_position(curr_mine) != -1:
                 self.set_cell(curr_mine, -1)
-                # self.update_adj(curr_mine)
                 num_mines -= 1
-
-    def update_adj(self, cell):
-        # for i in range(
-        adjacent = self.adj_list(cell)
-        for x in adjacent:
-            self.increment_cell(x)
 
     def create_visibility(self):
         for i in range(self.height):
@@ -141,12 +101,10 @@ class board:
 
     def __init__(self, num_height, num_width, num_mines):
         # @TODO: error out / throw exception if bad number of height / width
-
         self.height = num_height
         self.width = num_width
         self.mines = num_mines
         self.create_grid()
         self.place_mines(num_mines)
-        self.debugging_mines()
         self.calculate_adj()
         self.create_visibility()
