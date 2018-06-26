@@ -6,6 +6,8 @@ class position:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+    def print_pos(self):
+        print('cell: ' + str(self.x) + ', ' + str(self.y))  # DEBUGGING
 
 class board:
     height = 0
@@ -39,7 +41,7 @@ class board:
 
         for i in range(x-1, x+1):
             for j in range(y-1, y+1):
-                new = position(i, j)
+                new = position(j, i)
                 if not self.is_off_board(new):
                     adj.append(new)
         #
@@ -60,6 +62,32 @@ class board:
 
         return adj
 
+    def cell_adj(self, cell):
+        # import pdb; pdb.set_trace()     # DEBUGGING
+        x = cell.x
+        y = cell.y
+        print('--------')
+        i = x-1
+        while i <= x+1:
+        # for i in range(x-1, x+1):
+            j = y-1
+            while j <= y+1:
+            # for j in range(y-1, y+1):
+                temp = position(i, j)
+                temp.print_pos()
+                if not self.is_off_board(temp) and self.is_mine(temp):
+                    self.increment_cell(cell)
+                j += 1
+            i += 1
+
+    def calculate_adj(self):
+        for i in range(self.height):
+            for j in range(self.width):
+                cell = position(j, i)
+                # if self.at_position(cell) != -1:
+                if not self.is_mine(cell):
+                    self.cell_adj(cell)
+
     def random_position(self):
         x = random.randint(0, self.width-1)
         y = random.randint(0, self.height-1)
@@ -79,10 +107,11 @@ class board:
             curr_mine = self.random_position()
             if self.at_position(curr_mine) != -1:
                 self.set_cell(curr_mine, -1)
-                self.update_adj(curr_mine)
+                # self.update_adj(curr_mine)
                 num_mines -= 1
 
     def update_adj(self, cell):
+        # for i in range(
         adjacent = self.adj_list(cell)
         for x in adjacent:
             self.increment_cell(x)
@@ -102,6 +131,14 @@ class board:
         for row in visibility:
             print(''.join(row))
 
+
+    def debugging_mines(self):
+        self.grid[0] = [0, 0, -1, 0, 0]
+        self.grid[1] = [0, -1, -1, 0, 0]
+        self.grid[2] = [0, 0, 0, 0, 0]
+        self.grid[3] = [0, 0, -1, 0, 0]
+        self.grid[4] = [0, 0, 0, 0, -1]
+
     def __init__(self, num_height, num_width, num_mines):
         # @TODO: error out / throw exception if bad number of height / width
 
@@ -110,4 +147,6 @@ class board:
         self.mines = num_mines
         self.create_grid()
         self.place_mines(num_mines)
+        self.debugging_mines()
+        self.calculate_adj()
         self.create_visibility()
